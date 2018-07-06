@@ -65,17 +65,19 @@ public class AtmosphericScattering : MonoBehaviour
     private Vector3 _skyboxLUTSize = new Vector3(32, 128, 32);
 
     private RenderTexture _skyboxLUT;
-    private RenderTexture _skyboxLUT2;
+#pragma warning disable 0649 //Always null warning
+	private RenderTexture _skyboxLUT2;
+#pragma warning restore 0649
 
-    private Vector3 _inscatteringLUTSize = new Vector3(8, 8, 64);
+	private Vector3 _inscatteringLUTSize = new Vector3(8, 8, 64);
     private RenderTexture _inscatteringLUT;
     private RenderTexture _extinctionLUT;
 
     private const int LightLUTSize = 128;
 
-    [ColorUsage(false, true, 0, 15, 0, 15)]
+    [ColorUsage(false, true)] //, 0, 15, 0, 15)]
     private Color[] _directionalLightLUT;
-    [ColorUsage(false, true, 0, 10, 0, 10)]
+    [ColorUsage(false, true)] //, 0, 10, 0, 10)]
     private Color[] _ambientLightLUT;
 
     private static Material _material;
@@ -95,7 +97,7 @@ public class AtmosphericScattering : MonoBehaviour
     public int SampleCount = 16;
     public float MaxRayLength = 400;
 
-    [ColorUsage(false, true, 0, 10, 0, 10)]
+    [ColorUsage(false, true)] //, 0, 10, 0, 10)]
     public Color IncomingLight = new Color(4, 4, 4, 4);
     [Range(0, 10.0f)]
     public float RayleighScatterCoef = 1;
@@ -292,7 +294,8 @@ public class AtmosphericScattering : MonoBehaviour
 
         GameObject go = new GameObject("ReflectionProbe");
         go.transform.parent = _camera.transform;
-        go.transform.position = new Vector3(0, 0, 0);
+        go.transform.position = Vector3.zero;
+		go.hideFlags = HideFlags.DontSave;
 
         _reflectionProbe = go.AddComponent<ReflectionProbe>();
 
@@ -376,7 +379,8 @@ public class AtmosphericScattering : MonoBehaviour
         {
             _inscatteringLUT = new RenderTexture((int)_inscatteringLUTSize.x, (int)_inscatteringLUTSize.y, 0, RenderTextureFormat.ARGBHalf, RenderTextureReadWrite.Linear);
             _inscatteringLUT.volumeDepth = (int)_inscatteringLUTSize.z;
-            _inscatteringLUT.isVolume = true;
+			// _inscatteringLUT.isVolume = true;
+			_inscatteringLUT.dimension = TextureDimension.Tex3D;
             _inscatteringLUT.enableRandomWrite = true;
             _inscatteringLUT.name = "InscatteringLUT";
             _inscatteringLUT.Create();
@@ -386,8 +390,9 @@ public class AtmosphericScattering : MonoBehaviour
         {
             _extinctionLUT = new RenderTexture((int)_inscatteringLUTSize.x, (int)_inscatteringLUTSize.y, 0, RenderTextureFormat.ARGBHalf, RenderTextureReadWrite.Linear);
             _extinctionLUT.volumeDepth = (int)_inscatteringLUTSize.z;
-            _extinctionLUT.isVolume = true;
-            _extinctionLUT.enableRandomWrite = true;
+			// _extinctionLUT.isVolume = true;
+			_extinctionLUT.dimension = TextureDimension.Tex3D;
+			_extinctionLUT.enableRandomWrite = true;
             _extinctionLUT.name = "ExtinctionLUT";
             _extinctionLUT.Create();
         }
@@ -402,8 +407,9 @@ public class AtmosphericScattering : MonoBehaviour
         {
             _skyboxLUT = new RenderTexture((int)_skyboxLUTSize.x, (int)_skyboxLUTSize.y, 0, RenderTextureFormat.ARGBHalf, RenderTextureReadWrite.Linear);
             _skyboxLUT.volumeDepth = (int)_skyboxLUTSize.z;
-            _skyboxLUT.isVolume = true;
-            _skyboxLUT.enableRandomWrite = true;
+			// _skyboxLUT.isVolume = true;
+			_skyboxLUT.dimension = TextureDimension.Tex3D;
+			_skyboxLUT.enableRandomWrite = true;
             _skyboxLUT.name = "SkyboxLUT";
             _skyboxLUT.Create();
         }
@@ -491,8 +497,8 @@ public class AtmosphericScattering : MonoBehaviour
         {
             DestroyImmediate(_material);
             DestroyImmediate(_lightShaftMaterial);
-        }
-    }
+		}
+	}
 
     /// <summary>
     /// 
@@ -503,8 +509,8 @@ public class AtmosphericScattering : MonoBehaviour
         material.SetFloat("_PlanetRadius", PlanetRadius);
         material.SetVector("_DensityScaleHeight", DensityScale);
 
-        Vector4 scatteringR = new Vector4(5.8f, 13.5f, 33.1f, 0.0f) * 0.000001f;
-        Vector4 scatteringM = new Vector4(2.0f, 2.0f, 2.0f, 0.0f) * 0.00001f;
+        //Vector4 scatteringR = new Vector4(5.8f, 13.5f, 33.1f, 0.0f) * 0.000001f;
+        //Vector4 scatteringM = new Vector4(2.0f, 2.0f, 2.0f, 0.0f) * 0.00001f;
         material.SetVector("_ScatteringR", RayleighSct * RayleighScatterCoef);
         material.SetVector("_ScatteringM", MieSct * MieScatterCoef);
         material.SetVector("_ExtinctionR", RayleighSct * RayleighExtinctionCoef);
@@ -570,8 +576,9 @@ public class AtmosphericScattering : MonoBehaviour
         _randomVectorsLUT = new Texture2D(256, 1, TextureFormat.RGBAHalf, false, true);
         _randomVectorsLUT.name = "RandomVectorsLUT";
         Color[] colors = new Color[256];
-        UnityEngine.Random.seed = 1234567890;
-        for (int i = 0; i < colors.Length; ++i)
+        //UnityEngine.Random.seed = 1234567890;
+		UnityEngine.Random.InitState(1234567890);
+		for (int i = 0; i < colors.Length; ++i)
         {
             Vector3 vector = UnityEngine.Random.onUnitSphere;
             colors[i] = new Color(vector.x, vector.y, vector.z, 1);
@@ -678,9 +685,14 @@ public class AtmosphericScattering : MonoBehaviour
     /// </summary>
     void Update()
     {
-        _sunColor = ComputeLightColor();
-        if (UpdateLightColor)
-            UpdateDirectionalLightColor(_sunColor);
+		if (!Sun)
+			return;
+
+		_sunColor = ComputeLightColor();
+
+		if (UpdateLightColor)
+			UpdateDirectionalLightColor(_sunColor);
+
         if (UpdateAmbientColor)
             UpdateAmbientLightColor(ComputeAmbientColor());
     }

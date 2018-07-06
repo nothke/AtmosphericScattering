@@ -4,15 +4,17 @@ using UnityEngine;
 [CustomEditor(typeof(AtmosphericScattering))]
 class AtmosphericScatteringEditor : Editor
 {
-    private SerializedProperty generalSettingsFoldout;
+#pragma warning disable 0414 //Never used warning
+	private SerializedProperty generalSettingsFoldout;
     private SerializedProperty scatteringFoldout;
     private SerializedProperty sunFoldout;
     private SerializedProperty lightShaftsFoldout;
     private SerializedProperty ambientFoldout;
     private SerializedProperty dirLightFoldout;
     private SerializedProperty reflectionProbeFoldout;
+#pragma warning restore 0414
 
-    SerializedProperty RenderingMode;
+	SerializedProperty RenderingMode;
     SerializedProperty ScatteringComputeShader;
     SerializedProperty Sun;
     SerializedProperty RenderAtmosphericFog;
@@ -102,16 +104,19 @@ class AtmosphericScatteringEditor : Editor
         {
             AtmosphericScattering.RenderMode rm = (AtmosphericScattering.RenderMode)EditorGUILayout.EnumPopup("Rendering Mode", (AtmosphericScattering.RenderMode)RenderingMode.enumValueIndex);
             RenderingMode.enumValueIndex = (int)rm;
-            ScatteringComputeShader.objectReferenceValue = (ComputeShader)EditorGUILayout.ObjectField("Compute Shader", ScatteringComputeShader.objectReferenceValue, typeof(ComputeShader));
-            Sun.objectReferenceValue = (Light)EditorGUILayout.ObjectField("Sun", Sun.objectReferenceValue, typeof(Light));
-        }
+			//ScatteringComputeShader.objectReferenceValue = (ComputeShader)EditorGUILayout.ObjectField("Compute Shader", ScatteringComputeShader.objectReferenceValue, typeof(ComputeShader));
+			ScatteringComputeShader.objectReferenceValue = (ComputeShader)EditorGUILayout.ObjectField("Compute Shader", ScatteringComputeShader.objectReferenceValue, typeof(ComputeShader), true);
+			//Sun.objectReferenceValue = (Light)EditorGUILayout.ObjectField("Sun", Sun.objectReferenceValue, typeof(Light));
+			Sun.objectReferenceValue = (Light)EditorGUILayout.ObjectField("Sun", Sun.objectReferenceValue, typeof(Light), true);
+		}
 
-        a.ScatteringFoldout = EditorGUILayout.Foldout(a.ScatteringFoldout, "Atmospheric Scattering");
+		a.ScatteringFoldout = EditorGUILayout.Foldout(a.ScatteringFoldout, "Atmospheric Scattering");
         if (a.ScatteringFoldout)
         {
             RenderAtmosphericFog.boolValue = EditorGUILayout.Toggle("Render Atm Fog", RenderAtmosphericFog.boolValue);
-            IncomingLight.colorValue = EditorGUILayout.ColorField(new GUIContent("Incoming Light (*)"), IncomingLight.colorValue, false, false, true, new ColorPickerHDRConfig(0, 10, 0, 10));            
-            RayleighScatterCoef.floatValue = EditorGUILayout.Slider("Rayleigh Coef (*)", RayleighScatterCoef.floatValue, 0, 4);
+			//IncomingLight.colorValue = EditorGUILayout.ColorField(new GUIContent("Incoming Light (*)"), IncomingLight.colorValue, false, false, true, new ColorPickerHDRConfig(0, 10, 0, 10));            
+			IncomingLight.colorValue = EditorGUILayout.ColorField(new GUIContent("Incoming Light (*)"), IncomingLight.colorValue, false, false, true);//, new ColorPickerHDRConfig(0, 10, 0, 10));
+			RayleighScatterCoef.floatValue = EditorGUILayout.Slider("Rayleigh Coef (*)", RayleighScatterCoef.floatValue, 0, 4);
             MieScatterCoef.floatValue = EditorGUILayout.Slider("Mie Coef (*)", MieScatterCoef.floatValue, 0, 4);
             MieG.floatValue = EditorGUILayout.Slider("MieG", MieG.floatValue, 0, 0.999f);
             DistanceScale.floatValue = EditorGUILayout.FloatField("Distance Scale", DistanceScale.floatValue);
