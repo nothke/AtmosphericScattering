@@ -114,8 +114,8 @@ void ComputeLocalInscattering(float2 localDensity, float2 densityPA, float2 dens
 {
 	float2 densityCPA = densityCP + densityPA;
 
-	float3 Tr = densityCPA.x * _ExtinctionR;
-	float3 Tm = densityCPA.y * _ExtinctionM;
+	float3 Tr = densityCPA.x * _ExtinctionR.xyz;
+	float3 Tm = densityCPA.y * _ExtinctionM.xyz;
 
 	float3 extinction = exp(-(Tr + Tm));
 
@@ -135,7 +135,7 @@ void ApplyPhaseFunction(inout float3 scatterR, inout float3 scatterM, float cosA
 	// m
 	float g = _MieG;
 	float g2 = g * g;
-	phase = (1.0 / (4.0 * PI)) * ((3.0 * (1.0 - g2)) / (2.0 * (2.0 + g2))) * ((1 + cosAngle * cosAngle) / (pow((1 + g2 - 2 * g*cosAngle), 3.0 / 2.0)));
+	phase = (1.0 / (4.0 * PI)) * ((3.0 * (1.0 - g2)) / (2.0 * (2.0 + g2))) * ((1 + cosAngle * cosAngle) / (pow(abs(1 + g2 - 2 * g*cosAngle), 3.0 / 2.0)));
 	scatterM *= phase;
 }
 
@@ -239,8 +239,8 @@ void PrecomputeLightScattering(float3 rayStart, float3 rayDir, float rayLength, 
 		float3 currentScatterM = scatterM;
 
 		ApplyPhaseFunction(currentScatterR, currentScatterM, dot(rayDir, -lightDir.xyz));
-		float3 lightInscatter = (currentScatterR * _ScatteringR + currentScatterM * _ScatteringM) * _IncomingLight.xyz;
-		float3 lightExtinction = exp(-(densityCP.x * _ExtinctionR + densityCP.y * _ExtinctionM));
+		float3 lightInscatter = (currentScatterR * _ScatteringR.xyz + currentScatterM * _ScatteringM.xyz) * _IncomingLight.xyz;
+		float3 lightExtinction = exp(-(densityCP.x * _ExtinctionR.xyz + densityCP.y * _ExtinctionM.xyz));
 
 		_InscatteringLUT[coords] = float4(lightInscatter, 1);
 		_ExtinctionLUT[coords] = float4(lightExtinction, 1);
@@ -324,5 +324,5 @@ void InscatteringLUT(uint3 id : SV_DispatchThreadID)
 	rayDir /= rayLength;
 
 	float3 planetCenter = float3(0, -_PlanetRadius, 0);
-	PrecomputeLightScattering(rayStart, rayDir, rayLength, planetCenter, normalize(_LightDir), id, d);
+	PrecomputeLightScattering(rayStart, rayDir, rayLength, planetCenter, normalize(_LightDir), uint3(id), uint(d));
 }
