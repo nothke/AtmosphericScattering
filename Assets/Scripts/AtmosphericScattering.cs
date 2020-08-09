@@ -52,13 +52,24 @@ public class AtmosphericScattering : MonoBehaviour
         Medium
     }
 
+    public enum ReflectionProbeResolutions
+    {
+        _32 = 32,
+        _64 = 64,
+        _128 = 128,
+        _256 = 256
+    }
+
     #region Public fields
 
+    [Header("General Settings")]
     public RenderMode RenderingMode = RenderMode.Optimized;
     public LightShaftsQuality LightShaftQuality = LightShaftsQuality.Medium;
     public ComputeShader ScatteringComputeShader;
     public Light Sun;
 
+    [Header("Scattering")]
+    public bool RenderAtmosphericFog = true;
     [Range(1, 64)]
     public int SampleCount = 16;
     public float MaxRayLength = 400;
@@ -84,10 +95,14 @@ public class AtmosphericScattering : MonoBehaviour
     [Range(0.5f, 3.0f)]
     public float AmbientColorIntensity = 1.0f;
 
+    [Header("Sun")]
     public bool RenderSun = true;
     public float SunIntensity = 1;
+
+    [Header("Light Shafts")]
     public bool RenderLightShafts = false;
-    public bool RenderAtmosphericFog = true;
+
+    [Header("Reflection Probe")]
     public bool ReflectionProbe = true;
     public int ReflectionProbeResolution = 128;
 
@@ -104,10 +119,10 @@ public class AtmosphericScattering : MonoBehaviour
 
     private RenderTexture _skyboxLUT;
 #pragma warning disable 0649 //Always null warning
-	private RenderTexture _skyboxLUT2;
+    private RenderTexture _skyboxLUT2;
 #pragma warning restore 0649
 
-	private Vector3 _inscatteringLUTSize = new Vector3(8, 8, 64);
+    private Vector3 _inscatteringLUTSize = new Vector3(8, 8, 64);
     private RenderTexture _inscatteringLUT;
     private RenderTexture _extinctionLUT;
 
@@ -269,7 +284,7 @@ public class AtmosphericScattering : MonoBehaviour
         GameObject go = new GameObject("ReflectionProbe");
         go.transform.parent = _camera.transform;
         go.transform.position = Vector3.zero;
-		go.hideFlags = HideFlags.DontSave;
+        go.hideFlags = HideFlags.DontSave;
 
         _reflectionProbe = go.AddComponent<ReflectionProbe>();
 
@@ -326,7 +341,7 @@ public class AtmosphericScattering : MonoBehaviour
             _lightShaftsCommandBuffer.GetTemporaryRT(halfDepthBuffer, _camera.pixelWidth / 2, _camera.pixelHeight / 2, 0, FilterMode.Point, RenderTextureFormat.RFloat);
             _lightShaftsCommandBuffer.GetTemporaryRT(halfShaftsRT1, _camera.pixelWidth / 2, _camera.pixelHeight / 2, 0, FilterMode.Bilinear, RenderTextureFormat.RHalf);
             _lightShaftsCommandBuffer.GetTemporaryRT(halfShaftsRT2, _camera.pixelWidth / 2, _camera.pixelHeight / 2, 0, FilterMode.Bilinear, RenderTextureFormat.RHalf);
-            
+
             // down sample depth to half res
             _lightShaftsCommandBuffer.Blit(nullTexture, new RenderTargetIdentifier(halfDepthBuffer), _lightShaftMaterial, 4);
             _lightShaftsCommandBuffer.Blit(nullTexture, new RenderTargetIdentifier(halfShaftsRT1), _lightShaftMaterial, 10);
@@ -347,8 +362,8 @@ public class AtmosphericScattering : MonoBehaviour
         {
             _inscatteringLUT = new RenderTexture((int)_inscatteringLUTSize.x, (int)_inscatteringLUTSize.y, 0, RenderTextureFormat.ARGBHalf, RenderTextureReadWrite.Linear);
             _inscatteringLUT.volumeDepth = (int)_inscatteringLUTSize.z;
-			// _inscatteringLUT.isVolume = true;
-			_inscatteringLUT.dimension = TextureDimension.Tex3D;
+            // _inscatteringLUT.isVolume = true;
+            _inscatteringLUT.dimension = TextureDimension.Tex3D;
             _inscatteringLUT.enableRandomWrite = true;
             _inscatteringLUT.name = "InscatteringLUT";
             _inscatteringLUT.Create();
@@ -358,9 +373,9 @@ public class AtmosphericScattering : MonoBehaviour
         {
             _extinctionLUT = new RenderTexture((int)_inscatteringLUTSize.x, (int)_inscatteringLUTSize.y, 0, RenderTextureFormat.ARGBHalf, RenderTextureReadWrite.Linear);
             _extinctionLUT.volumeDepth = (int)_inscatteringLUTSize.z;
-			// _extinctionLUT.isVolume = true;
-			_extinctionLUT.dimension = TextureDimension.Tex3D;
-			_extinctionLUT.enableRandomWrite = true;
+            // _extinctionLUT.isVolume = true;
+            _extinctionLUT.dimension = TextureDimension.Tex3D;
+            _extinctionLUT.enableRandomWrite = true;
             _extinctionLUT.name = "ExtinctionLUT";
             _extinctionLUT.Create();
         }
@@ -372,9 +387,9 @@ public class AtmosphericScattering : MonoBehaviour
         {
             _skyboxLUT = new RenderTexture((int)_skyboxLUTSize.x, (int)_skyboxLUTSize.y, 0, RenderTextureFormat.ARGBHalf, RenderTextureReadWrite.Linear);
             _skyboxLUT.volumeDepth = (int)_skyboxLUTSize.z;
-			// _skyboxLUT.isVolume = true;
-			_skyboxLUT.dimension = TextureDimension.Tex3D;
-			_skyboxLUT.enableRandomWrite = true;
+            // _skyboxLUT.isVolume = true;
+            _skyboxLUT.dimension = TextureDimension.Tex3D;
+            _skyboxLUT.enableRandomWrite = true;
             _skyboxLUT.name = "SkyboxLUT";
             _skyboxLUT.Create();
         }
@@ -428,7 +443,7 @@ public class AtmosphericScattering : MonoBehaviour
 
         ScatteringComputeShader.SetVector("_InscatteringLUTSize", _inscatteringLUTSize);
 
-        ScatteringComputeShader.SetVector("_BottomLeftCorner", _FrustumCorners[0]);        
+        ScatteringComputeShader.SetVector("_BottomLeftCorner", _FrustumCorners[0]);
         ScatteringComputeShader.SetVector("_TopLeftCorner", _FrustumCorners[1]);
         ScatteringComputeShader.SetVector("_TopRightCorner", _FrustumCorners[2]);
         ScatteringComputeShader.SetVector("_BottomRightCorner", _FrustumCorners[3]);
@@ -453,8 +468,8 @@ public class AtmosphericScattering : MonoBehaviour
         {
             DestroyImmediate(_material);
             DestroyImmediate(_lightShaftMaterial);
-		}
-	}
+        }
+    }
 
     private void UpdateMaterialParameters(Material material)
     {
@@ -524,8 +539,8 @@ public class AtmosphericScattering : MonoBehaviour
         _randomVectorsLUT.name = "RandomVectorsLUT";
         Color[] colors = new Color[256];
         //UnityEngine.Random.seed = 1234567890;
-		UnityEngine.Random.InitState(1234567890);
-		for (int i = 0; i < colors.Length; ++i)
+        UnityEngine.Random.InitState(1234567890);
+        for (int i = 0; i < colors.Length; ++i)
         {
             Vector3 vector = UnityEngine.Random.onUnitSphere;
             colors[i] = new Color(vector.x, vector.y, vector.z, 1);
@@ -614,13 +629,13 @@ public class AtmosphericScattering : MonoBehaviour
 
     void Update()
     {
-		if (!Sun)
-			return;
+        if (!Sun)
+            return;
 
-		_sunColor = ComputeLightColor();
+        _sunColor = ComputeLightColor();
 
-		if (UpdateLightColor)
-			UpdateDirectionalLightColor(_sunColor);
+        if (UpdateLightColor)
+            UpdateDirectionalLightColor(_sunColor);
 
         if (UpdateAmbientColor)
             UpdateAmbientLightColor(ComputeAmbientColor());
@@ -688,7 +703,7 @@ public class AtmosphericScattering : MonoBehaviour
             _material.EnableKeyword("ATMOSPHERE_REFERENCE");
         else
             _material.DisableKeyword("ATMOSPHERE_REFERENCE");
-        
+
         if (RenderLightShafts)
             _material.EnableKeyword("LIGHT_SHAFTS");
         else
@@ -705,14 +720,14 @@ public class AtmosphericScattering : MonoBehaviour
             _camera.farClipPlane = 100000;
         // get four corners of camera frustom in world space
         // bottom left
-        _FrustumCorners[0] = _camera.ViewportToWorldPoint(new Vector3(0, 0, _camera.farClipPlane));        
+        _FrustumCorners[0] = _camera.ViewportToWorldPoint(new Vector3(0, 0, _camera.farClipPlane));
         // top left
         _FrustumCorners[1] = _camera.ViewportToWorldPoint(new Vector3(0, 1, _camera.farClipPlane));
         // top right
         _FrustumCorners[2] = _camera.ViewportToWorldPoint(new Vector3(1, 1, _camera.farClipPlane));
         // bottom right
         _FrustumCorners[3] = _camera.ViewportToWorldPoint(new Vector3(1, 0, _camera.farClipPlane));
-        
+
         // update parameters
         UpdateSkyBoxParameters();
         UpdateLightScatteringParameters();
@@ -739,7 +754,7 @@ public class AtmosphericScattering : MonoBehaviour
         Texture nullTexture = null;
         Graphics.Blit(nullTexture, destination, _material, 3);
     }
-    
+
     private void GenerateDitherTexture()
     {
         if (_ditheringTexture != null)
