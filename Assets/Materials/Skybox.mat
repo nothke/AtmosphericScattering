@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Skybox
   m_Shader: {fileID: 4800000, guid: 465b4dce0e4d216418f56625961a4666, type: 3}
-  m_ShaderKeywords: ATMOSPHERE_REFERENCE RENDER_SUN
+  m_ShaderKeywords: RENDER_SUN
   m_LightmapFlags: 5
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
