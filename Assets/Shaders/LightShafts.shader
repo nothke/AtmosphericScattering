@@ -181,31 +181,32 @@ Shader "Hidden/AtmosphericScattering/LightShafts"
 				//return float4(1, 0, 0, 1);
 				return tex2D(loColor, input.uv);
 			}
-
-
-			// find nearest sample
-			float minDepthDiff = depthDiff[0];
-			float2 nearestUv = input.uv00;
-
-			if (depthDiff[1] < minDepthDiff)
+			else
 			{
-				nearestUv = input.uv10;
-				minDepthDiff = depthDiff[1];
-			}
+				// find nearest sample
+				float minDepthDiff = depthDiff[0];
+				float2 nearestUv = input.uv00;
 
-			if (depthDiff[2] < minDepthDiff)
-			{
-				nearestUv = input.uv01;
-				minDepthDiff = depthDiff[2];
-			}
+				if (depthDiff[1] < minDepthDiff)
+				{
+					nearestUv = input.uv10;
+					minDepthDiff = depthDiff[1];
+				}
 
-			if (depthDiff[3] < minDepthDiff)
-			{
-				nearestUv = input.uv11;
-				minDepthDiff = depthDiff[3];
-			}
+				if (depthDiff[2] < minDepthDiff)
+				{
+					nearestUv = input.uv01;
+					minDepthDiff = depthDiff[2];
+				}
 
-			return tex2D(loColor, nearestUv);
+				if (depthDiff[3] < minDepthDiff)
+				{
+					nearestUv = input.uv11;
+					minDepthDiff = depthDiff[3];
+				}
+
+				return tex2D(loColor, nearestUv);
+			}
 		}
 
 		//-----------------------------------------------------------------------------------------
