@@ -142,13 +142,6 @@ public class AtmosphericScattering : MonoBehaviour
     #endregion
 
 #if UNITY_EDITOR
-    public bool GeneralSettingsFoldout = true;
-    public bool ScatteringFoldout = true;
-    public bool SunFoldout = false;
-    public bool LightShaftsFoldout = true;
-    public bool AmbientFoldout = false;
-    public bool DirLightFoldout = false;
-    public bool ReflectionProbeFoldout = false;
     private StringBuilder _stringBuilder = new StringBuilder();
 #endif
 
