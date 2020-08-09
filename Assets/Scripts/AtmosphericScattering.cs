@@ -152,9 +152,6 @@ public class AtmosphericScattering : MonoBehaviour
     private StringBuilder _stringBuilder = new StringBuilder();
 #endif
 
-    /// <summary>
-    /// 
-    /// </summary>
     void Start()
     {
         Initialize();
@@ -203,9 +200,6 @@ public class AtmosphericScattering : MonoBehaviour
             InitializeReflectionProbe();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public bool IsInitialized()
     {
         if (_material == null || _lightShaftMaterial == null || _camera == null || _inscatteringLUT == null || _particleDensityLUT == null)
@@ -213,9 +207,6 @@ public class AtmosphericScattering : MonoBehaviour
         return true;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public void EnableLightShafts()
     {
         if (_lightShaftsCommandBuffer == null)
@@ -228,18 +219,12 @@ public class AtmosphericScattering : MonoBehaviour
         Sun.AddCommandBuffer(LightEvent.BeforeScreenspaceMask, _lightShaftsCommandBuffer);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public void DisableLightShafts()
     {
         Sun.RemoveCommandBuffer(LightEvent.AfterShadowMap, _cascadeShadowCommandBuffer);
         Sun.RemoveCommandBuffer(LightEvent.BeforeScreenspaceMask, _lightShaftsCommandBuffer);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public void EnableReflectionProbe()
     {
         if (_reflectionProbe == null)
@@ -247,18 +232,12 @@ public class AtmosphericScattering : MonoBehaviour
         _reflectionProbe.gameObject.SetActive(true);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public void DisableReflectionProbe()
     {
         if (_reflectionProbe != null)
             _reflectionProbe.gameObject.SetActive(false);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public void ChangeReflectionProbeResolution()
     {
         if (_reflectionProbe != null)
@@ -266,9 +245,6 @@ public class AtmosphericScattering : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    /// <summary>
-    /// 
-    /// </summary>
     public string Validate()
     {
         _stringBuilder.Length = 0;
@@ -289,9 +265,6 @@ public class AtmosphericScattering : MonoBehaviour
     }
 #endif
 
-    /// <summary>
-    /// 
-    /// </summary>
     private void InitializeReflectionProbe()
     {
         if (_reflectionProbe != null)
@@ -317,9 +290,6 @@ public class AtmosphericScattering : MonoBehaviour
         _reflectionProbe.size = new Vector3(100000, 100000, 100000);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public void InitializeLightShafts()
     {
         if (_cascadeShadowCommandBuffer == null)
@@ -378,9 +348,6 @@ public class AtmosphericScattering : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     private void InitializeInscatteringLUT()
     {
         if (_inscatteringLUT == null)
@@ -406,9 +373,6 @@ public class AtmosphericScattering : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     private void PrecomputeSkyboxLUT()
     {
         if (_skyboxLUT == null)
@@ -446,9 +410,6 @@ public class AtmosphericScattering : MonoBehaviour
         ScatteringComputeShader.Dispatch(kernel, (int)_skyboxLUTSize.x, (int)_skyboxLUTSize.y, (int)_skyboxLUTSize.z);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     private void UpdateCommonComputeShaderParameters(int kernel)
     {
         ScatteringComputeShader.SetTexture(kernel, "_ParticleDensityLUT", _particleDensityLUT);
@@ -465,9 +426,6 @@ public class AtmosphericScattering : MonoBehaviour
         ScatteringComputeShader.SetFloat("_MieG", MieG);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     private void UpdateInscatteringLUT()
     {
         int kernel = ScatteringComputeShader.FindKernel("InscatteringLUT");
@@ -491,9 +449,6 @@ public class AtmosphericScattering : MonoBehaviour
         ScatteringComputeShader.Dispatch(kernel, (int)_inscatteringLUTSize.x, (int)_inscatteringLUTSize.y, 1);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public void OnDestroy()
     {
         if (Application.isPlaying)
@@ -508,9 +463,6 @@ public class AtmosphericScattering : MonoBehaviour
 		}
 	}
 
-    /// <summary>
-    /// 
-    /// </summary>
     private void UpdateMaterialParameters(Material material)
     {
         material.SetFloat("_AtmosphereHeight", AtmosphereHeight);
@@ -540,9 +492,6 @@ public class AtmosphericScattering : MonoBehaviour
         material.SetTexture("_SkyboxLUT2", _skyboxLUT2);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public void CalculateLightLUTs()
     {
         if (_lightColorTexture == null)
@@ -576,9 +525,6 @@ public class AtmosphericScattering : MonoBehaviour
         PrecomputeSkyboxLUT();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     private void InitialzieRandomVectorsLUT()
     {
         _randomVectorsLUT = new Texture2D(256, 1, TextureFormat.RGBAHalf, false, true);
@@ -597,9 +543,6 @@ public class AtmosphericScattering : MonoBehaviour
         _randomVectorsLUT.Apply();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     private void PrecomputeParticleDensity()
     {
         if (_particleDensityLUT == null)
@@ -616,9 +559,6 @@ public class AtmosphericScattering : MonoBehaviour
         _material.SetTexture("_ParticleDensityLUT", _particleDensityLUT);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     private Color ComputeLightColor()
     {
         float cosAngle = Vector3.Dot(Vector3.up, -Sun.transform.forward);
@@ -637,9 +577,6 @@ public class AtmosphericScattering : MonoBehaviour
         return c.gamma;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     private void UpdateDirectionalLightColor(Color c)
     {
         Vector3 color = new Vector3(c.r, c.g, c.b);
@@ -650,9 +587,6 @@ public class AtmosphericScattering : MonoBehaviour
         Sun.intensity = Mathf.Max(length, 0.01f) * LightColorIntensity; // make sure unity doesn't disable this light
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     private Color ComputeAmbientColor()
     {
         float cosAngle = Vector3.Dot(Vector3.up, -Sun.transform.forward);
@@ -671,9 +605,6 @@ public class AtmosphericScattering : MonoBehaviour
         return c.gamma;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     private void UpdateAmbientLightColor(Color c)
     {
 #if UNITY_5_4_OR_NEWER
@@ -688,9 +619,6 @@ public class AtmosphericScattering : MonoBehaviour
 #endif
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     void Update()
     {
 		if (!Sun)
@@ -705,9 +633,6 @@ public class AtmosphericScattering : MonoBehaviour
             UpdateAmbientLightColor(ComputeAmbientColor());
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     private void UpdateSkyBoxParameters()
     {
         if (RenderSettings.skybox != null)
@@ -729,9 +654,6 @@ public class AtmosphericScattering : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     private void UpdateLightShaftsParameters()
     {
 #if UNITY_5_4_OR_NEWER
@@ -750,9 +672,6 @@ public class AtmosphericScattering : MonoBehaviour
         _lightShaftMaterial.SetVector("_HalfResTexelSize", new Vector4(1.0f / (_camera.pixelWidth * 0.5f), 1.0f / (_camera.pixelHeight * 0.5f), 0, 0));
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     private void UpdateLightScatteringParameters()
     {
         UpdateMaterialParameters(_material);
@@ -783,9 +702,6 @@ public class AtmosphericScattering : MonoBehaviour
             _material.DisableKeyword("LIGHT_SHAFTS");
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public void OnPreRender()
     {
         if (!IsInitialized())
@@ -812,9 +728,6 @@ public class AtmosphericScattering : MonoBehaviour
         UpdateInscatteringLUT();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     [ImageEffectOpaque]
     public void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
@@ -834,9 +747,6 @@ public class AtmosphericScattering : MonoBehaviour
         Graphics.Blit(nullTexture, destination, _material, 3);
     }
     
-    /// <summary>
-    /// 
-    /// </summary>
     private void GenerateDitherTexture()
     {
         if (_ditheringTexture != null)
