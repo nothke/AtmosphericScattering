@@ -324,5 +324,5 @@ void InscatteringLUT(uint3 id : SV_DispatchThreadID)
 	rayDir /= rayLength;
 
 	float3 planetCenter = float3(0, -_PlanetRadius, 0);
-	PrecomputeLightScattering(rayStart, rayDir, rayLength, planetCenter, normalize(_LightDir), uint3(id), uint(d));
+	PrecomputeLightScattering(rayStart, rayDir, rayLength, planetCenter, normalize(_LightDir.xyz), uint3(id), uint(d));
 }
