@@ -52,10 +52,48 @@ public class AtmosphericScattering : MonoBehaviour
         Medium
     }
 
+    #region Public fields
+
     public RenderMode RenderingMode = RenderMode.Optimized;
     public LightShaftsQuality LightShaftQuality = LightShaftsQuality.Medium;
     public ComputeShader ScatteringComputeShader;
     public Light Sun;
+
+    [Range(1, 64)]
+    public int SampleCount = 16;
+    public float MaxRayLength = 400;
+
+    [ColorUsage(false, true)] //, 0, 10, 0, 10)]
+    public Color IncomingLight = new Color(4, 4, 4, 4);
+    [Range(0, 10.0f)]
+    public float RayleighScatterCoef = 1;
+    [Range(0, 10.0f)]
+    public float RayleighExtinctionCoef = 1;
+    [Range(0, 10.0f)]
+    public float MieScatterCoef = 1;
+    [Range(0, 10.0f)]
+    public float MieExtinctionCoef = 1;
+    [Range(0.0f, 0.999f)]
+    public float MieG = 0.76f;
+    public float DistanceScale = 1;
+
+    public bool UpdateLightColor = true;
+    [Range(0.5f, 3.0f)]
+    public float LightColorIntensity = 1.0f;
+    public bool UpdateAmbientColor = true;
+    [Range(0.5f, 3.0f)]
+    public float AmbientColorIntensity = 1.0f;
+
+    public bool RenderSun = true;
+    public float SunIntensity = 1;
+    public bool RenderLightShafts = false;
+    public bool RenderAtmosphericFog = true;
+    public bool ReflectionProbe = true;
+    public int ReflectionProbeResolution = 128;
+
+    #endregion
+
+    #region Private field
 
     private RenderTexture _particleDensityLUT = null;
     private Texture2D _randomVectorsLUT = null;
@@ -93,37 +131,15 @@ public class AtmosphericScattering : MonoBehaviour
 
     private ReflectionProbe _reflectionProbe;
 
-    [Range(1, 64)]
-    public int SampleCount = 16;
-    public float MaxRayLength = 400;
+    private const float AtmosphereHeight = 80000.0f;
+    private const float PlanetRadius = 6371000.0f;
+    private readonly Vector4 DensityScale = new Vector4(7994.0f, 1200.0f, 0, 0);
+    private readonly Vector4 RayleighSct = new Vector4(5.8f, 13.5f, 33.1f, 0.0f) * 0.000001f;
+    private readonly Vector4 MieSct = new Vector4(2.0f, 2.0f, 2.0f, 0.0f) * 0.00001f;
 
-    [ColorUsage(false, true)] //, 0, 10, 0, 10)]
-    public Color IncomingLight = new Color(4, 4, 4, 4);
-    [Range(0, 10.0f)]
-    public float RayleighScatterCoef = 1;
-    [Range(0, 10.0f)]
-    public float RayleighExtinctionCoef = 1;
-    [Range(0, 10.0f)]
-    public float MieScatterCoef = 1;
-    [Range(0, 10.0f)]
-    public float MieExtinctionCoef = 1;
-    [Range(0.0f, 0.999f)]
-    public float MieG = 0.76f;
-    public float DistanceScale = 1;
+    private Vector4[] _FrustumCorners = new Vector4[4];
 
-    public bool UpdateLightColor = true;
-    [Range(0.5f, 3.0f)]
-    public float LightColorIntensity = 1.0f;
-    public bool UpdateAmbientColor = true;
-    [Range(0.5f, 3.0f)]
-    public float AmbientColorIntensity = 1.0f;
-
-    public bool RenderSun = true;
-    public float SunIntensity = 1;
-    public bool RenderLightShafts = false;
-    public bool RenderAtmosphericFog = true;
-    public bool ReflectionProbe = true;
-    public int ReflectionProbeResolution = 128;
+    #endregion
 
 #if UNITY_EDITOR
     public bool GeneralSettingsFoldout = true;
@@ -135,14 +151,6 @@ public class AtmosphericScattering : MonoBehaviour
     public bool ReflectionProbeFoldout = false;
     private StringBuilder _stringBuilder = new StringBuilder();
 #endif
-
-    private const float AtmosphereHeight = 80000.0f;
-    private const float PlanetRadius = 6371000.0f;
-    private readonly Vector4 DensityScale = new Vector4(7994.0f, 1200.0f, 0, 0);
-    private readonly Vector4 RayleighSct = new Vector4(5.8f, 13.5f, 33.1f, 0.0f) * 0.000001f;
-    private readonly Vector4 MieSct = new Vector4(2.0f, 2.0f, 2.0f, 0.0f) * 0.00001f;
-
-    private Vector4[] _FrustumCorners = new Vector4[4];
 
     /// <summary>
     /// 
