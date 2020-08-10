@@ -64,7 +64,6 @@ public class AtmosphericScattering : MonoBehaviour
 
     [Header("General Settings")]
     public RenderMode RenderingMode = RenderMode.Optimized;
-    public LightShaftsQuality LightShaftQuality = LightShaftsQuality.Medium;
     public ComputeShader ScatteringComputeShader;
     public Light Sun;
 
@@ -101,10 +100,11 @@ public class AtmosphericScattering : MonoBehaviour
 
     [Header("Light Shafts")]
     public bool RenderLightShafts = false;
+    public LightShaftsQuality LightShaftQuality = LightShaftsQuality.Medium;
 
     [Header("Reflection Probe")]
     public bool ReflectionProbe = true;
-    public int ReflectionProbeResolution = 128;
+    public ReflectionProbeResolutions ReflectionProbeResolution = ReflectionProbeResolutions._128;
 
     #endregion
 
@@ -158,6 +158,8 @@ public class AtmosphericScattering : MonoBehaviour
 
 #if UNITY_EDITOR
     private StringBuilder _stringBuilder = new StringBuilder();
+    bool prevReflectionProbe;
+    bool prevRenderLightShafts;
 #endif
 
     void Start()
@@ -249,7 +251,7 @@ public class AtmosphericScattering : MonoBehaviour
     public void ChangeReflectionProbeResolution()
     {
         if (_reflectionProbe != null)
-            _reflectionProbe.resolution = ReflectionProbeResolution;
+            _reflectionProbe.resolution = (int)ReflectionProbeResolution;
     }
 
 #if UNITY_EDITOR
@@ -270,6 +272,38 @@ public class AtmosphericScattering : MonoBehaviour
             _stringBuilder.AppendLine("! Light shafts are enabled but atm. fog isn't");
 
         return _stringBuilder.ToString();
+    }
+
+    private void OnValidate()
+    {
+        if (!IsInitialized())
+            return;
+
+        if (RenderLightShafts != prevRenderLightShafts)
+        {
+            if (RenderLightShafts)
+            {
+                EnableLightShafts();
+                UpdateLightShaftsParameters();
+            }
+            else
+                DisableLightShafts();
+        }
+
+        prevRenderLightShafts = RenderLightShafts;
+
+        if (ReflectionProbe != prevReflectionProbe)
+        {
+            if (ReflectionProbe)
+            {
+                EnableReflectionProbe();
+                ChangeReflectionProbeResolution();
+            }
+            else
+                DisableReflectionProbe();
+        }
+
+        prevReflectionProbe = ReflectionProbe;
     }
 #endif
 
