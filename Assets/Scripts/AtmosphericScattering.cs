@@ -279,6 +279,9 @@ public class AtmosphericScattering : MonoBehaviour
         if (!IsInitialized())
             return;
 
+        if (!Sun)
+            return;
+
         if (RenderLightShafts != prevRenderLightShafts)
         {
             if (RenderLightShafts)
@@ -746,8 +749,12 @@ public class AtmosphericScattering : MonoBehaviour
 
     public void OnPreRender()
     {
+
         if (!IsInitialized())
             Initialize();
+
+        if (!Sun)
+            return;
 
         // scene view camera can have ridiculously high far plane (several millions), it breaks the effect, clamp it
         if (_camera.farClipPlane > 100000)
