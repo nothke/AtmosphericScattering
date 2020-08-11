@@ -225,8 +225,10 @@ Shader "Hidden/AtmosphericScattering"
 
 #pragma shader_feature ATMOSPHERE_REFERENCE
 #pragma shader_feature LIGHT_SHAFTS
+#pragma shader_feature SKYBOX_BLEND
 
-			sampler2D _Background;			
+			sampler2D _Background;
+			float4 _SkyboxBlend;
 
 			struct VSInput
 			{
@@ -284,6 +286,8 @@ Shader "Hidden/AtmosphericScattering"
 				_SunIntensity = 0;
 				float4 inscattering = IntegrateInscattering(rayStart, rayDir, rayLength, planetCenter, _DistanceScale, _LightDir, 16, extinction);
 					
+				//return inscattering;
+
 #ifndef ATMOSPHERE_REFERENCE
 				inscattering.xyz = tex3D(_InscatteringLUT, float3(uv.x, uv.y, linearDepth));
 				extinction.xyz = tex3D(_ExtinctionLUT, float3(uv.x, uv.y, linearDepth));
@@ -305,8 +309,77 @@ Shader "Hidden/AtmosphericScattering"
 					inscattering = 0;
 					extinction = 1;
 				}
+
+#ifdef SKYBOX_BLEND
+				// SKYBOX - copied from skybox
+				float3 lightDir = -_WorldSpaceLightPos0.xyz;
+
+				float4 scatterR = 0;
+				float4 scatterM = 0;
+
+				float height = length(rayStart - planetCenter) - _PlanetRadius;
+				float3 normal = normalize(rayStart - planetCenter);
+
+				// Nothke: mirror ground
+				float3 rayDirMirror = rayDir;
+				//rayDirMirror.y = abs(rayDirMirror.y);
+				rayDirMirror.y = max(0, rayDirMirror.y);
+				//rayDirMirror.y = 0;
+
+				float viewZenith = dot(normal, rayDirMirror);
+				float sunZenith = dot(normal, -lightDir);
+
+				float3 coords = float3(height / _AtmosphereHeight, viewZenith * 0.5 + 0.5, sunZenith * 0.5 + 0.5);
+
+				coords.x = pow(height / _AtmosphereHeight, 0.5);
+				float ch = -(sqrt(height * (2 * _PlanetRadius + height)) / (_PlanetRadius + height));
+				if (viewZenith > ch)
+				{
+					coords.y = 0.5 * pow((viewZenith - ch) / (1 - ch), 0.2) + 0.5;
+				}
+				else
+				{
+					coords.y = 0.5 * pow((ch - viewZenith) / (ch + 1), 0.2);
+				}
+				coords.z = 0.5 * ((atan(max(sunZenith, -0.1975) * tan(1.26*1.1)) / 1.1) + (1 - 0.26));
+
+				scatterR = tex3D(_SkyboxLUT, coords);
+
+				// HIGH_QUALITY
+				//scatterM.x = scatterR.w;
+				//scatterM.yz = tex3D(_SkyboxLUT2, coords).xy;
+				// !HIGH_QUALITY
+				scatterM.xyz = scatterR.xyz * ((scatterR.w) / (scatterR.x));
+
+				float3 m = scatterM;
+				//scatterR = 0;
+				// phase function
+
+
+				ApplyPhaseFunctionElek(scatterR.xyz, scatterM.xyz, dot(rayDirMirror, -lightDir.xyz));
+				float3 lightInscatter = (scatterR * _ScatteringR + scatterM * _ScatteringM) * _IncomingLight.xyz;
+//#ifdef RENDER_SUN
+				//lightInscatter += RenderSun(m, dot(rayDir, -lightDir.xyz)) * 10;
+//#endif
+				//return background;
+				float4 skyboxScatter = float4(max(0, lightInscatter), 1);
+
+				// END SKYBOX
+
+				//background = lerp(background, skyboxScatter, distanceFactor);
+				// inverse lerp: (T - A) / (B - A);
+				float ivDistanceFactor = (rayLength - _SkyboxBlend.x) / (_SkyboxBlend.y - _SkyboxBlend.x);
+				//ivDistanceFactor = saturate(ivDistanceFactor);
+				ivDistanceFactor = smoothstep(0, 1, ivDistanceFactor);
+#endif
+
+				//return background;
 					
 				float4 c = background * extinction + inscattering;
+
+#ifdef SKYBOX_BLEND
+				c = lerp(c, skyboxScatter, ivDistanceFactor);
+#endif
 				return c;
 			}
 			ENDCG

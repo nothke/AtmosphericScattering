@@ -102,6 +102,11 @@ public class AtmosphericScattering : MonoBehaviour
     public bool RenderLightShafts = false;
     public LightShaftsQuality LightShaftQuality = LightShaftsQuality.Medium;
 
+    [Header("Skybox blend")]
+    public bool skyboxBlend = true;
+    public float skyboxBlendMin = 500;
+    public float skyboxBlendMax = 5000;
+
     [Header("Reflection Probe")]
     public bool ReflectionProbe = true;
     public ReflectionProbeResolutions ReflectionProbeResolution = ReflectionProbeResolutions._128;
@@ -160,6 +165,7 @@ public class AtmosphericScattering : MonoBehaviour
     private StringBuilder _stringBuilder = new StringBuilder();
     bool prevReflectionProbe;
     bool prevRenderLightShafts;
+    bool prevSkyboxBlend;
 #endif
 
     void Start()
@@ -254,6 +260,14 @@ public class AtmosphericScattering : MonoBehaviour
             _reflectionProbe.resolution = (int)ReflectionProbeResolution;
     }
 
+    public void EnableSkyboxBlend(bool enable)
+    {
+        if (enable)
+            _material.EnableKeyword("SKYBOX_BLEND");
+        else
+            _material.DisableKeyword("SKYBOX_BLEND");
+    }
+
 #if UNITY_EDITOR
     public string Validate()
     {
@@ -305,6 +319,17 @@ public class AtmosphericScattering : MonoBehaviour
             else
                 DisableReflectionProbe();
         }
+
+        if (skyboxBlend != prevSkyboxBlend)
+        {
+            EnableSkyboxBlend(skyboxBlend);
+            prevSkyboxBlend = skyboxBlend;
+        }
+
+        skyboxBlendMin = Mathf.Clamp(skyboxBlendMin, 0, skyboxBlendMax);
+        skyboxBlendMax = Mathf.Clamp(skyboxBlendMax, skyboxBlendMin, Mathf.Infinity);
+
+        UpdateMaterialParameters(_material);
 
         prevReflectionProbe = ReflectionProbe;
     }
@@ -535,6 +560,8 @@ public class AtmosphericScattering : MonoBehaviour
 
         material.SetTexture("_SkyboxLUT", _skyboxLUT);
         material.SetTexture("_SkyboxLUT2", _skyboxLUT2);
+
+        material.SetVector("_SkyboxBlend", new Vector4(skyboxBlendMin, skyboxBlendMax, 0, 0));
     }
 
     public void CalculateLightLUTs()
@@ -745,6 +772,8 @@ public class AtmosphericScattering : MonoBehaviour
             _material.EnableKeyword("LIGHT_SHAFTS");
         else
             _material.DisableKeyword("LIGHT_SHAFTS");
+
+        EnableSkyboxBlend(skyboxBlend);
     }
 
     public void OnPreRender()
