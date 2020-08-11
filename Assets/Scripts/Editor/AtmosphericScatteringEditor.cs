@@ -16,6 +16,9 @@ class AtmosphericScatteringEditor : Editor
 
         DrawDefaultInspector();
 
+        if (GUILayout.Button("Update LookUp Tables"))
+            a.CalculateLightLUTs();
+
         //serializedObject.ApplyModifiedProperties();
     }
 }
