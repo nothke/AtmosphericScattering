@@ -157,9 +157,22 @@ public class AtmosphericScattering : MonoBehaviour
 
     private const float AtmosphereHeight = 80000.0f;
     private const float PlanetRadius = 6371000.0f;
+
+    [Header("Planet")]
+    [ColorUsage(false, true)]
+    public Color RayleighCoefficient = new Color(5.8f, 13.5f, 33.1f, 1) * 0.01f;
+    [ColorUsage(false, true)]
+    public Color MieCoefficient = new Vector4(2.0f, 2.0f, 2.0f, 0.0f) * 0.1f;
+
+    public float densityScale0 = 7994.0f;
+    public float densityScale1 = 1200.0f;
+
+    // Earth defaults
+    /*
     private readonly Vector4 DensityScale = new Vector4(7994.0f, 1200.0f, 0, 0);
     private readonly Vector4 RayleighSct = new Vector4(5.8f, 13.5f, 33.1f, 0.0f) * 0.000001f;
     private readonly Vector4 MieSct = new Vector4(2.0f, 2.0f, 2.0f, 0.0f) * 0.00001f;
+    */
 
     private Vector4[] _FrustumCorners = new Vector4[4];
 
@@ -486,6 +499,10 @@ public class AtmosphericScattering : MonoBehaviour
 
     private void UpdateCommonComputeShaderParameters(int kernel)
     {
+        Vector4 DensityScale = new Vector4(densityScale0, densityScale1, 0, 0);
+        Vector4 RayleighSct = RayleighCoefficient * 0.000001f * 100;
+        Vector4 MieSct = MieCoefficient * 0.00001f * 10;
+
         ScatteringComputeShader.SetTexture(kernel, "_ParticleDensityLUT", _particleDensityLUT);
         ScatteringComputeShader.SetFloat("_AtmosphereHeight", AtmosphereHeight);
         ScatteringComputeShader.SetFloat("_PlanetRadius", PlanetRadius);
@@ -539,6 +556,10 @@ public class AtmosphericScattering : MonoBehaviour
 
     private void UpdateMaterialParameters(Material material)
     {
+        Vector4 DensityScale = new Vector4(densityScale0, densityScale1, 0, 0);
+        Vector4 RayleighSct = RayleighCoefficient * 0.000001f * 100;
+        Vector4 MieSct = MieCoefficient * 0.00001f * 10;
+
         material.SetFloat("_AtmosphereHeight", AtmosphereHeight);
         material.SetFloat("_PlanetRadius", PlanetRadius);
         material.SetVector("_DensityScaleHeight", DensityScale);
