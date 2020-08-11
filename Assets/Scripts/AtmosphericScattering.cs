@@ -715,7 +715,8 @@ public class AtmosphericScattering : MonoBehaviour
     private void UpdateAmbientLightColor(Color c)
     {
 #if UNITY_5_4_OR_NEWER
-        RenderSettings.ambientLight = c * AmbientColorIntensity;
+        if (RenderSettings.ambientMode == AmbientMode.Flat)
+            RenderSettings.ambientLight = c * AmbientColorIntensity;
 #else
         Vector3 color = new Vector3(c.r, c.g, c.b);
         float length = color.magnitude;
@@ -724,6 +725,12 @@ public class AtmosphericScattering : MonoBehaviour
         RenderSettings.ambientLight = new Color(color.x, color.y, color.z, 1);
         RenderSettings.ambientIntensity = Mathf.Max(length, 0.01f) * AmbientColorIntensity;
 #endif
+    }
+
+    public void UpdateAmbientSkybox()
+    {
+        if (RenderSettings.ambientMode == AmbientMode.Skybox)
+            DynamicGI.UpdateEnvironment();
     }
 
     void Update()
