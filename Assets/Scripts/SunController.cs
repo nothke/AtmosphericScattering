@@ -6,7 +6,9 @@ class SunController : MonoBehaviour
 {
     [Range(5, 40000)]
     public float Height = 5;
+#pragma warning disable CS0649
     public Transform DirLightTransform;
+#pragma warning restore CS0649
     public bool ShowHelp = true;
 
     private Vector3 prevMousePos;
