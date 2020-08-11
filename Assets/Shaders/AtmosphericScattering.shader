@@ -228,7 +228,11 @@ Shader "Hidden/AtmosphericScattering"
 #pragma shader_feature SKYBOX_BLEND
 
 			sampler2D _Background;
+
 			float4 _SkyboxBlend;
+			float4 _HeightParams;
+			uniform float _FogDensity = 0.005;
+			uniform float _FogHeight = 1000;
 
 			struct VSInput
 			{
@@ -253,6 +257,26 @@ Shader "Hidden/AtmosphericScattering"
 				o.wpos = _FrustumCorners[i.vertexId];
 
 				return o;
+			}
+
+			// Linear half-space fog, from https://www.terathon.com/lengyel/Lengyel-UnifiedFog.pdf
+			float ComputeHalfSpace(float3 wsDir, float3 wsCamera, float4 _HeightParams)
+			{
+				float3 wpos = wsCamera + wsDir;
+				float FH = _HeightParams.x;
+				float3 C = wsCamera;
+				float3 V = wsDir;
+				float3 P = wpos;
+				float3 aV = _HeightParams.w * V;
+				float FdotC = _HeightParams.y;
+				float k = _HeightParams.z;
+				float FdotP = P.y - FH;
+				float FdotV = wsDir.y;
+				float c1 = k * (FdotP + FdotC);
+				float c2 = (1 - 2 * k) * FdotP;
+				float g = min(c2, 0.0);
+				g = -length(aV) * (c1 - g * g / abs(FdotV + 1.0e-5f));
+				return g;
 			}
 
 			float4 fragDir(v2f i) : COLOR0
@@ -309,6 +333,8 @@ Shader "Hidden/AtmosphericScattering"
 					inscattering = 0;
 					extinction = 1;
 				}
+
+				float4 c = background * extinction + inscattering;
 
 #ifdef SKYBOX_BLEND
 				// SKYBOX - copied from skybox
@@ -371,15 +397,48 @@ Shader "Hidden/AtmosphericScattering"
 				float ivDistanceFactor = (rayLength - _SkyboxBlend.x) / (_SkyboxBlend.y - _SkyboxBlend.x);
 				//ivDistanceFactor = saturate(ivDistanceFactor);
 				ivDistanceFactor = smoothstep(0, 1, ivDistanceFactor);
+
+				// HEIGHT FOG
+
+				float g = 0;
+
+				// heightfog multiplies with far plane
+				// Warning: clamped to prevent precision errors
+				float rayLengthClamped = clamp(rayLength, 0, 1000000);
+				float3 fogRay = rayDir * rayLengthClamped;
+				//return saturate(rayLength * 0.01);
+
+				_FogHeight = 1000;
+				_FogDensity = 0.001;
+
+				_HeightParams.x = _FogHeight;
+				_HeightParams.y = _WorldSpaceCameraPos.y - _HeightParams.x; // temp
+				_HeightParams.z = (_HeightParams.y <= 0.0f ? 1.0f : 0.0f); // temp
+				_HeightParams.w = _FogDensity * 0.5;
+
+				g += ComputeHalfSpace(fogRay, _WorldSpaceCameraPos, _HeightParams);
+				_FogDensity *= 1.2011224087f;
+				float fogFac = _FogDensity * max(0.0, g);
+				fogFac = exp2(-fogFac * fogFac);
+				fogFac = saturate(fogFac);
+
+				//skyboxScatter = lerp(skyboxScatter, 0, fogFac);
+
+				// Combine fog factor and blend distance factor
+				float finalScatterFac = (1-fogFac)* ivDistanceFactor;
+				finalScatterFac *= shadow;
+
+				// lerp skybox blend
+				c = lerp(c, skyboxScatter, finalScatterFac);
+				//return c;
+
+				//c = lerp(c, skyboxScatter, ivDistanceFactor);
+				if (linearDepth > 0.99999) // is skybox
+					return c;
+				else
+					return lerp(c, skyboxScatter, saturate(linearDepth * 1.5));
 #endif
 
-				//return background;
-					
-				float4 c = background * extinction + inscattering;
-
-#ifdef SKYBOX_BLEND
-				c = lerp(c, skyboxScatter, ivDistanceFactor);
-#endif
 				return c;
 			}
 			ENDCG
