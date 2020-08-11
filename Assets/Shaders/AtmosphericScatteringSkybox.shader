@@ -52,9 +52,6 @@ Shader "Skybox/AtmosphericScattering"
 			#include "AtmosphericScattering.cginc"
 
 			float3 _CameraPos;
-
-			float _SunApparentAngle;
-			float _SunDiscIntensity;
 			
 			struct appdata
 			{

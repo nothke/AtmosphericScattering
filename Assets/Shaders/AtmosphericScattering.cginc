@@ -43,6 +43,9 @@ float4 _FrustumCorners[4];
 
 float _SunIntensity;
 
+float _SunApparentAngle;
+float _SunDiscIntensity;
+
 sampler2D _ParticleDensityLUT;
 sampler2D _RandomVectors;
 
@@ -216,6 +219,12 @@ float4 IntegrateInscattering(float3 rayStart, float3 rayDir, float rayLength, fl
 	//scatterR = 0;
 	float3 lightInscatter = (scatterR * _ScatteringR + scatterM * _ScatteringM) * _IncomingLight.xyz;
 	lightInscatter += RenderSun(m, dot(rayDir, -lightDir.xyz)) * _SunIntensity;
+
+	// Sun disc
+	// Hack, this only works if you're using ACES, so red becomes white at high intensity:
+	float3 sunColor = float3(1, 0.2, 0.2);
+	lightInscatter += saturate(ceil(-cos(_SunApparentAngle) + dot(rayDir, -lightDir.xyz))) * sunColor * _SunDiscIntensity;
+
 	float3 lightExtinction = exp(-(densityCP.x * _ExtinctionR + densityCP.y * _ExtinctionM));
 
 	extinction = float4(lightExtinction, 0);
