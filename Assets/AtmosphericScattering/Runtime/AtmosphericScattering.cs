@@ -775,7 +775,6 @@ public class AtmosphericScattering : MonoBehaviour
 
                 if (angle > updateSkyboxAmbientSunAngleThreshold)
                 {
-                    Debug.Log("Updating");
                     UpdateAmbientSkybox();
                     lastSunDir = sunDir;
                 }
