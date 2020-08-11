@@ -193,6 +193,15 @@ public class AtmosphericScattering : MonoBehaviour
     void Start()
     {
         Initialize();
+
+        if (RenderSettings.ambientMode == AmbientMode.Skybox)
+            StartCoroutine(RenderAmbientAtStart());
+    }
+
+    IEnumerator RenderAmbientAtStart()
+    {
+        yield return null;
+        UpdateAmbientSkybox();
     }
 
     private void Initialize()
