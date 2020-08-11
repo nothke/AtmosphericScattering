@@ -87,12 +87,20 @@ public class AtmosphericScattering : MonoBehaviour
     public float MieG = 0.76f;
     public float DistanceScale = 1;
 
+    [Header("Sunlight")]
     public bool UpdateLightColor = true;
     [Range(0.5f, 3.0f)]
     public float LightColorIntensity = 1.0f;
+
+    [Header("Ambient Color")]
     public bool UpdateAmbientColor = true;
     [Range(0.5f, 3.0f)]
     public float AmbientColorIntensity = 1.0f;
+
+    [Header("Skybox Ambient")]
+    public bool updateSkyboxAmbient = true;
+    public float updateSkyboxAmbientEverySeconds = 1;
+    public float updateSkyboxAmbientSunAngleThreshold = 2;
 
     [Header("Sun")]
     public bool RenderSun = true;
@@ -170,8 +178,6 @@ public class AtmosphericScattering : MonoBehaviour
     private const float AtmosphereHeight = 80000.0f;
     private const float PlanetRadius = 6371000.0f;
 
-
-
     // Earth defaults
     /*
     private readonly Vector4 DensityScale = new Vector4(7994.0f, 1200.0f, 0, 0);
@@ -180,6 +186,9 @@ public class AtmosphericScattering : MonoBehaviour
     */
 
     private Vector4[] _FrustumCorners = new Vector4[4];
+
+    float lastSkyboxAmbientUpdate;
+    Vector3 lastSunDir;
 
     #endregion
 
@@ -196,6 +205,8 @@ public class AtmosphericScattering : MonoBehaviour
 
         if (RenderSettings.ambientMode == AmbientMode.Skybox)
             StartCoroutine(RenderAmbientAtStart());
+
+        lastSunDir = Sun.transform.forward;
     }
 
     IEnumerator RenderAmbientAtStart()
@@ -754,6 +765,24 @@ public class AtmosphericScattering : MonoBehaviour
 
         if (UpdateAmbientColor)
             UpdateAmbientLightColor(ComputeAmbientColor());
+
+        if (updateSkyboxAmbient)
+        {
+            if (Time.time - lastSkyboxAmbientUpdate > updateSkyboxAmbientEverySeconds)
+            {
+                Vector3 sunDir = Sun.transform.forward;
+                float angle = Vector3.Angle(sunDir, lastSunDir);
+
+                if (angle > updateSkyboxAmbientSunAngleThreshold)
+                {
+                    Debug.Log("Updating");
+                    UpdateAmbientSkybox();
+                    lastSunDir = sunDir;
+                }
+
+                lastSkyboxAmbientUpdate = Time.time;
+            }
+        }
     }
 
     private void UpdateSkyBoxParameters()
