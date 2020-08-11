@@ -115,6 +115,15 @@ public class AtmosphericScattering : MonoBehaviour
     public bool ReflectionProbe = true;
     public ReflectionProbeResolutions ReflectionProbeResolution = ReflectionProbeResolutions._128;
 
+    [Header("Scattering coefficients")]
+    [ColorUsage(false, true)]
+    public Color RayleighCoefficient = new Color(5.8f, 13.5f, 33.1f, 1) * 0.01f;
+    [ColorUsage(false, true)]
+    public Color MieCoefficient = new Vector4(2.0f, 2.0f, 2.0f, 0.0f) * 0.1f;
+
+    public float densityScale0 = 7994.0f;
+    public float densityScale1 = 1200.0f;
+
     #endregion
 
     #region Private field
@@ -158,14 +167,7 @@ public class AtmosphericScattering : MonoBehaviour
     private const float AtmosphereHeight = 80000.0f;
     private const float PlanetRadius = 6371000.0f;
 
-    [Header("Planet")]
-    [ColorUsage(false, true)]
-    public Color RayleighCoefficient = new Color(5.8f, 13.5f, 33.1f, 1) * 0.01f;
-    [ColorUsage(false, true)]
-    public Color MieCoefficient = new Vector4(2.0f, 2.0f, 2.0f, 0.0f) * 0.1f;
 
-    public float densityScale0 = 7994.0f;
-    public float densityScale1 = 1200.0f;
 
     // Earth defaults
     /*
