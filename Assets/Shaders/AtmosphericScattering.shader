@@ -408,9 +408,6 @@ Shader "Hidden/AtmosphericScattering"
 				float3 fogRay = rayDir * rayLengthClamped;
 				//return saturate(rayLength * 0.01);
 
-				_FogHeight = 1000;
-				_FogDensity = 0.001;
-
 				_HeightParams.x = _FogHeight;
 				_HeightParams.y = _WorldSpaceCameraPos.y - _HeightParams.x; // temp
 				_HeightParams.z = (_HeightParams.y <= 0.0f ? 1.0f : 0.0f); // temp

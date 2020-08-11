@@ -107,6 +107,10 @@ public class AtmosphericScattering : MonoBehaviour
     public float skyboxBlendMin = 500;
     public float skyboxBlendMax = 5000;
 
+    [Header("Height fog - affects skybox blend")]
+    public float fogHeight = 1000;
+    public float fogDensity = 0.001f;
+
     [Header("Reflection Probe")]
     public bool ReflectionProbe = true;
     public ReflectionProbeResolutions ReflectionProbeResolution = ReflectionProbeResolutions._128;
@@ -562,6 +566,9 @@ public class AtmosphericScattering : MonoBehaviour
         material.SetTexture("_SkyboxLUT2", _skyboxLUT2);
 
         material.SetVector("_SkyboxBlend", new Vector4(skyboxBlendMin, skyboxBlendMax, 0, 0));
+
+        material.SetFloat("_FogHeight", fogHeight);
+        material.SetFloat("_FogDensity", fogDensity);
     }
 
     public void CalculateLightLUTs()
