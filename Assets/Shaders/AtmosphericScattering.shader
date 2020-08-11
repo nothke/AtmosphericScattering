@@ -423,7 +423,10 @@ Shader "Hidden/AtmosphericScattering"
 
 				// Combine fog factor and blend distance factor
 				float finalScatterFac = (1-fogFac)* ivDistanceFactor;
+
+#ifdef LIGHT_SHAFTS
 				finalScatterFac *= shadow;
+#endif
 
 				// lerp skybox blend
 				c = lerp(c, skyboxScatter, finalScatterFac);
