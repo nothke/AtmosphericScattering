@@ -98,6 +98,9 @@ public class AtmosphericScattering : MonoBehaviour
     public bool RenderSun = true;
     public float SunIntensity = 1;
 
+    public float sunApparentAngle = 0.0091f; // radians, default for Earth
+    public float sunDiscIntensity = 100; // non-physical
+
     [Header("Light Shafts")]
     public bool RenderLightShafts = false;
     public LightShaftsQuality LightShaftQuality = LightShaftsQuality.Medium;
@@ -339,18 +342,20 @@ public class AtmosphericScattering : MonoBehaviour
                 DisableReflectionProbe();
         }
 
+        prevReflectionProbe = ReflectionProbe;
+
         if (skyboxBlend != prevSkyboxBlend)
         {
             EnableSkyboxBlend(skyboxBlend);
-            prevSkyboxBlend = skyboxBlend;
         }
+
+        prevSkyboxBlend = skyboxBlend;
 
         skyboxBlendMin = Mathf.Clamp(skyboxBlendMin, 0, skyboxBlendMax);
         skyboxBlendMax = Mathf.Clamp(skyboxBlendMax, skyboxBlendMin, Mathf.Infinity);
 
         UpdateMaterialParameters(_material);
-
-        prevReflectionProbe = ReflectionProbe;
+        UpdateSkyBoxParameters();
     }
 #endif
 
@@ -753,6 +758,9 @@ public class AtmosphericScattering : MonoBehaviour
                 RenderSettings.skybox.DisableKeyword("RENDER_SUN");
 
             //RenderSettings.skybox.EnableKeyword("HIGH_QUALITY");
+
+            RenderSettings.skybox.SetFloat("_SunApparentAngle", sunApparentAngle);
+            RenderSettings.skybox.SetFloat("_SunDiscIntensity", sunDiscIntensity);
         }
     }
 

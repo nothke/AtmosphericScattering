@@ -52,6 +52,9 @@ Shader "Skybox/AtmosphericScattering"
 			#include "AtmosphericScattering.cginc"
 
 			float3 _CameraPos;
+
+			float _SunApparentAngle;
+			float _SunDiscIntensity;
 			
 			struct appdata
 			{
@@ -141,6 +144,11 @@ Shader "Skybox/AtmosphericScattering"
 				float3 lightInscatter = (scatterR * _ScatteringR + scatterM * _ScatteringM) * _IncomingLight.xyz;
 #ifdef RENDER_SUN
 				lightInscatter += RenderSun(m, dot(rayDir, -lightDir.xyz)) * _SunIntensity;
+
+				// Sun disc
+				// Hack, this only works if you're using ACES, so red becomes white at high intensity:
+				float3 sunColor = float3(1, 0.2, 0.2); 
+				lightInscatter += saturate(ceil(-cos(_SunApparentAngle) + dot(rayDir, -lightDir.xyz))) * sunColor * _SunDiscIntensity;
 #endif
 
 				return float4(max(0, lightInscatter), 1);
