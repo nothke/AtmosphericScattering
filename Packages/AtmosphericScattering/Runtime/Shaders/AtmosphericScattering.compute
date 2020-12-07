@@ -294,6 +294,9 @@ void SkyboxLUT(uint3 id : SV_DispatchThreadID)
 
 	ScatteringOutput scattering = IntegrateInscattering(rayStart, rayDir, rayLength, planetCenter, lightDir);
 	
+	//if (intersection.x > 0)
+		//scattering.rayleigh.xyz += float3(1000, 10000, 100);
+
 	//color.inscattering.z = coords.z;
 	_SkyboxLUT[id.xyz] = float4(scattering.rayleigh.xyz, scattering.mie.x);
 

@@ -489,7 +489,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 3.8524e-41, z: 0, w: 9.403955e-38}
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
@@ -1330,12 +1330,26 @@ MonoBehaviour:
   LightColorIntensity: 1
   UpdateAmbientColor: 0
   AmbientColorIntensity: 0.5
+  updateSkyboxAmbient: 1
+  updateSkyboxAmbientEverySeconds: 1
+  updateSkyboxAmbientSunAngleThreshold: 2
   RenderSun: 1
   SunIntensity: 1
+  sunApparentAngle: 0.0091
+  sunDiscIntensity: 100
   RenderLightShafts: 1
   LightShaftQuality: 1
+  skyboxBlend: 0
+  skyboxBlendMin: 500
+  skyboxBlendMax: 5000
+  fogHeight: 1000
+  fogDensity: 0.001
   ReflectionProbe: 1
   ReflectionProbeResolution: 128
+  RayleighCoefficient: {r: 0.058000002, g: 0.13499999, b: 0.33099997, a: 0.01}
+  MieCoefficient: {r: 0.2, g: 0.2, b: 0.2, a: 0}
+  densityScale0: 7994
+  densityScale1: 1200
 --- !u!114 &1942086272
 MonoBehaviour:
   m_ObjectHideFlags: 0

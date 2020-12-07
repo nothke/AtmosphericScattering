@@ -350,7 +350,7 @@ Shader "Hidden/AtmosphericScattering"
 				float3 rayDirMirror = rayDir;
 				//rayDirMirror.y = abs(rayDirMirror.y);
 				rayDirMirror.y = max(0, rayDirMirror.y);
-				//rayDirMirror.y = 0;
+				rayDirMirror.y = 0;
 
 				float viewZenith = dot(normal, rayDirMirror);
 				float sunZenith = dot(normal, -lightDir);
@@ -390,6 +390,10 @@ Shader "Hidden/AtmosphericScattering"
 				//return background;
 				float4 skyboxScatter = float4(max(0, lightInscatter), 1);
 
+				// Colorize blend
+				//skyboxScatter *= float4(0.8, 0.8, 0, 1);
+				skyboxScatter *= 0.4;
+
 				// END SKYBOX
 
 				//background = lerp(background, skyboxScatter, distanceFactor);
@@ -425,7 +429,7 @@ Shader "Hidden/AtmosphericScattering"
 				float finalScatterFac = (1-fogFac)* ivDistanceFactor;
 
 #ifdef LIGHT_SHAFTS
-				finalScatterFac *= shadow;
+				finalScatterFac *= lerp(1, 1, shadow);
 #endif
 
 				// lerp skybox blend
