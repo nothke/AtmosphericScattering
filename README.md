@@ -1,4 +1,16 @@
-# Atmospheric Scattering for Unity 5
+### Warning: This is an old, unsupported repo, the package itself has been moved [HERE](https://github.com/nothke/atmospheric-scattering)
+
+# Atmospheric Scattering for Unity ~5~ 2019
+
+### Nothke's changes:
+* Updated to work in Unity 2019
+* Scene view is broken at the moment
+* Added ability to have multiple atmosphere LUTs cached, enabling instantly switching between atmospheres. Was a requirement for [TITAN, OPSND](https://dario-zubovic.itch.io/opsnd)
+* Added height fog and skybox blend to smoothly blend meshes into skybox
+* Exposed scattering color coefficients to enable creating funky colored atmospheres
+* Added a bright sun disc for nicer HDR bloom
+
+
 [![IMAGE ALT TEXT HERE](https://0rvyea-dm2305.files.1drv.com/y4m8IYQKFvibqLRG_QUmIgqF8TsZgx9PnWa92JunBI9titjls-SYeD5rEgps7XoylMsjBc_xbYYJFwUDG2it4vtpK3THTFqBM3xZjgSuIR9WW28X6ZXlj1lu1CmcyfoncgLFD1PjrZ8SI7FDi8qODxiwi-3kyjPh5mcnrEz8t0rSSx1xNMvX2ddeLcypSp7W2gCdsUGC5BQB6blmuT4wJ1-Vg?width=1403&height=639&cropmode=none)](https://youtu.be/MC6MKYHllX0)
 
 Open source (BSD) atmospheric scattering for Unity 5. Features precomputed physically based atmospheric scattering (single scattering at the moment). It can render skybox, atmospheric fog, light shafts and global reflection probe (only skybox is reflected). It can also control directional and ambient light color/intensity. All parts can be turned on and off at any time.
